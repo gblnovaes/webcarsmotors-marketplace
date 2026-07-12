@@ -18,13 +18,13 @@ export default function Logo({ variant = 'dark', to = '/', className = '' }: Log
       >
         <Car size={18} strokeWidth={2.25} />
       </span>
-      <span className={`text-h3 font-bold tracking-tight ${textClass}`}>WebcarsMotors</span>
+      <span className={`text-h3 font-bold tracking-tight ${textClass}`}>WebCars Motors</span>
     </span>
   )
 
   if (to) {
     return (
-      <Link to={to} className="shrink-0 w-fit" aria-label="WebcarsMotors — início">
+      <Link to={to} className="shrink-0 w-fit" aria-label="WebCars Motors — início">
         {content}
       </Link>
     )

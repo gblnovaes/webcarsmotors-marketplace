@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import Header from '@/shared/components/Header'
 import Footer from '@/shared/components/Footer'
+import TopBar from '@/features/vehicles/components/home/TopBar'
 import { useVehicles } from '@/features/vehicles/context/VehiclesContext'
 import VehicleBreadcrumb from '@/features/vehicles/components/detail/VehicleBreadcrumb'
 import VehicleGallery from '@/features/vehicles/components/detail/VehicleGallery'
@@ -20,10 +21,11 @@ export default function VehicleDetail() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-neutral-50">
+      <TopBar />
       <Header />
       <main className="flex-1 pb-16">
-        <div className="container-content pt-6">
+        <div className="container-content pt-6 md:pt-8">
           {loading && (
             <p className="text-body text-neutral-500 py-20 text-center">Carregando veículo...</p>
           )}
