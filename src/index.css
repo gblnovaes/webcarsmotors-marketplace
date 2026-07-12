@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Carriage — Accent presets (drop-in). Uncomment ONE ramp.
+   Changing the accent re-themes the entire product.
+   ============================================================ */
+:root {
+  /* Blue (default) */
+  --accent-50: #EFF4FF;
+  --accent-100: #DBE6FF;
+  --accent-400: #5B8DEF;
+  --accent-500: #3B7BE9;
+  --accent-600: #2563EB;
+  --accent-700: #1D4FB8;
+
+  /* Amber preset
+  --accent-50: #FFF7E6;  --accent-100: #FDECC4;
+  --accent-400: #F2B035;  --accent-500: #E89A15;
+  --accent-600: #B4740A;  --accent-700: #8A5806; */
+
+  /* Red preset
+  --accent-50: #FEF2F2;  --accent-100: #FEE2E2;
+  --accent-400: #F16063;  --accent-500: #E23B3E;
+  --accent-600: #DC2626;  --accent-700: #B01B1B; */
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-neutral-50 text-neutral-600 font-sans;
+    font-size: 15px;
+    line-height: 24px;
+  }
+  /* Tabular numerals for aligned prices/specs */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Visible focus ring — accent-600, 2px offset */
+  *:focus-visible {
+    outline: 2px solid var(--accent-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .container-content {
+    @apply w-full max-w-content mx-auto px-6;
+  }
+
+  /* Buttons — radius-md, Label type, functional elevation */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md text-label
+           px-4 py-3 transition-colors duration-150 select-none whitespace-nowrap;
+    min-height: 44px;
+  }
+  .btn-primary {
+    @apply bg-primary text-neutral-0 hover:bg-primary-hover;
+  }
+  .btn-secondary {
+    @apply bg-neutral-900 text-neutral-0 hover:bg-neutral-800;
+  }
+  .btn-ghost {
+    @apply bg-neutral-0 text-neutral-700 border border-neutral-200 hover:bg-neutral-100;
+  }
+
+  /* Pills / chips */
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-pill text-label px-3 py-1.5
+           border border-neutral-200 bg-neutral-0 text-neutral-600
+           transition-colors duration-150 cursor-pointer;
+  }
+  .pill-active {
+    @apply bg-accent-soft border-transparent text-primary;
+    box-shadow: inset 0 0 0 1.5px var(--accent-600);
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-sm text-overline uppercase px-2 py-1;
+  }
+  .badge-accent {
+    @apply bg-accent-soft text-primary;
+  }
+  .badge-success {
+    background: #EAF6EE;
+    color: #15803D;
+  }
+  .badge-warning {
+    background: #FBF1E3;
+    color: #B45309;
+  }
+
+  .card {
+    @apply bg-neutral-0 rounded-md border border-neutral-200 shadow-sm
+           transition-all duration-150;
+  }
+  .card-hover:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+
+  .input {
+    @apply w-full bg-neutral-0 rounded-sm border border-neutral-200 text-body
+           text-neutral-700 placeholder:text-neutral-400 px-4;
+    min-height: 44px;
+  }
+}
