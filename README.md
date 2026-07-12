@@ -75,7 +75,7 @@ Arquivos em `supabase/migrations/` (já aplicadas no projeto remoto):
 1. `init_vehicles` — tabelas, RLS, Storage `vehicle-images`
 2. `seed_vehicles` — 6 veículos de exemplo
 3. `init_clients` — tabela `clients` + RLS (admin-only)
-4. `seed_clients` — 6 clientes de exemplo
+4. `seed_clients` / `seed_clients_10` — 10 clientes de exemplo
 
 ## Design system
 
