@@ -19,6 +19,11 @@ port = 54323
 
 [auth]
 enabled = true
-site_url = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173"]
+site_url = "https://webcarsmotors-marketplace.vercel.app"
+additional_redirect_urls = [
+  "https://webcarsmotors-marketplace.vercel.app",
+  "https://webcarsmotors-marketplace.vercel.app/**",
+  "http://localhost:5173",
+  "http://localhost:5173/**",
+]
 enable_signup = true

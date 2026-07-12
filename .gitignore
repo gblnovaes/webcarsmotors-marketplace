@@ -6,7 +6,8 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .env
+.env.local
 .env.*.local
-
 .agents/
 skills-lock.json
+.vercel
