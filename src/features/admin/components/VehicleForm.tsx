@@ -13,6 +13,13 @@ import { getDataSource } from '@/data/repositories'
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import { uploadVehicleImage } from '@/data/repositories/supabaseVehicleRepository'
 
+type VehicleFormProps = {
+  initial?: Vehicle | null
+  onSubmit: (data: VehicleInput) => Promise<void>
+  onCancel: () => void
+  hideTitle?: boolean
+}
+
 type FormState = {
   brand: string
   model: string
@@ -86,13 +93,12 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 const ctrl =
   'w-full bg-neutral-50 rounded-md border border-neutral-200 text-body text-neutral-700 placeholder:text-neutral-400 px-4 min-h-[48px]'
 
-type VehicleFormProps = {
-  initial?: Vehicle | null
-  onSubmit: (data: VehicleInput) => Promise<void> | void
-  onCancel: () => void
-}
-
-export default function VehicleForm({ initial, onSubmit, onCancel }: VehicleFormProps) {
+export default function VehicleForm({
+  initial,
+  onSubmit,
+  onCancel,
+  hideTitle = false,
+}: VehicleFormProps) {
   const [form, setForm] = useState<FormState>(() => toFormState(initial))
   const [saving, setSaving] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -147,14 +153,16 @@ export default function VehicleForm({ initial, onSubmit, onCancel }: VehicleForm
 
   return (
     <div className="card rounded-lg">
-      <div className="px-6 md:px-8 py-5 border-b border-neutral-200">
-        <h2 className="text-h3 text-neutral-900">
-          {initial ? 'Editar Veículo' : 'Cadastrar Novo Veículo'}
-        </h2>
-      </div>
+      {!hideTitle && (
+        <div className="px-6 md:px-8 py-5 border-b border-neutral-200">
+          <h2 className="text-h3 text-neutral-900">
+            {initial ? 'Editar Veículo' : 'Cadastrar Novo Veículo'}
+          </h2>
+        </div>
+      )}
 
       <form onSubmit={(e) => void submit(e)}>
-        <div className="px-6 md:px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
+        <div className="px-4 sm:px-6 md:px-8 py-6 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5">
           <Field label="Marca">
             <select value={form.brand} onChange={set('brand')} className={`${ctrl} cursor-pointer`}>
               <option value="">Selecione a marca</option>
@@ -326,11 +334,15 @@ export default function VehicleForm({ initial, onSubmit, onCancel }: VehicleForm
           </div>
         </div>
 
-        <div className="px-6 md:px-8 py-4 border-t border-neutral-200 flex items-center justify-end gap-3">
-          <button type="button" onClick={onCancel} className="btn btn-ghost">
+        <div className="px-4 sm:px-6 md:px-8 py-4 border-t border-neutral-200 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3">
+          <button type="button" onClick={onCancel} className="btn btn-ghost w-full sm:w-auto">
             Cancelar
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
+          <button
+            type="submit"
+            className="btn btn-primary w-full sm:w-auto"
+            disabled={saving}
+          >
             {saving ? 'Salvando...' : initial ? 'Salvar Alterações' : 'Salvar Veículo'}
           </button>
         </div>
