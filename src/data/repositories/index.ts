@@ -1,7 +1,9 @@
 import { createLocalStorageVehicleRepository } from './localStorageVehicleRepository'
 import { createSupabaseVehicleRepository } from './supabaseVehicleRepository'
+import { createLocalStorageClientRepository } from './localStorageClientRepository'
+import { createSupabaseClientRepository } from './supabaseClientRepository'
 import { getSupabaseClient, isSupabaseConfigured } from '@/lib/supabase/client'
-import type { VehicleRepository } from './types'
+import type { ClientRepository, VehicleRepository } from './types'
 
 export type DataSource = 'local' | 'supabase'
 
@@ -11,18 +13,31 @@ export function getDataSource(): DataSource {
   return 'local'
 }
 
-let cached: VehicleRepository | null = null
+let cachedVehicles: VehicleRepository | null = null
+let cachedClients: ClientRepository | null = null
 
 export function getVehicleRepository(): VehicleRepository {
-  if (cached) return cached
+  if (cachedVehicles) return cachedVehicles
 
   if (getDataSource() === 'supabase') {
-    cached = createSupabaseVehicleRepository(getSupabaseClient())
+    cachedVehicles = createSupabaseVehicleRepository(getSupabaseClient())
   } else {
-    cached = createLocalStorageVehicleRepository()
+    cachedVehicles = createLocalStorageVehicleRepository()
   }
 
-  return cached
+  return cachedVehicles
 }
 
-export type { VehicleRepository }
+export function getClientRepository(): ClientRepository {
+  if (cachedClients) return cachedClients
+
+  if (getDataSource() === 'supabase') {
+    cachedClients = createSupabaseClientRepository(getSupabaseClient())
+  } else {
+    cachedClients = createLocalStorageClientRepository()
+  }
+
+  return cachedClients
+}
+
+export type { VehicleRepository, ClientRepository }

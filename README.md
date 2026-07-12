@@ -35,12 +35,13 @@ src/
   app/                 App + rotas (React Router)
   features/
     vehicles/          domínio, filtros, Home, cards
-    admin/             painel, formulário, tabela
+    clients/           domínio de clientes (CRM)
+    admin/             painel, formulários, tabelas
     auth/              AuthContext + Login + ProtectedRoute
   shared/              Header, Footer, Logo, format
   data/
-    repositories/      VehicleRepository (local | supabase)
-    seed/              estoque de exemplo
+    repositories/      VehicleRepository + ClientRepository (local | supabase)
+    seed/              estoque e clientes de exemplo
   lib/supabase/        client Supabase
 ```
 
@@ -73,6 +74,8 @@ Arquivos em `supabase/migrations/` (já aplicadas no projeto remoto):
 
 1. `init_vehicles` — tabelas, RLS, Storage `vehicle-images`
 2. `seed_vehicles` — 6 veículos de exemplo
+3. `init_clients` — tabela `clients` + RLS (admin-only)
+4. `seed_clients` — 6 clientes de exemplo
 
 ## Design system
 
