@@ -3,6 +3,7 @@ import { UploadCloud } from 'lucide-react'
 import {
   brands,
   categories,
+  DEFAULT_SELLER,
   DEFAULT_VEHICLE_IMAGE,
   fuels,
   STATUS_META,
@@ -34,8 +35,20 @@ type FormState = {
   category: string
   status: VehicleStatus
   description: string
+  version: string
+  doors: string
+  drivetrain: string
+  power: string
+  torque: string
+  ipva: string
+  featuresText: string
+  galleryUrls: string
   imageUrl: string
   imageFile: File | null
+  sellerName: string
+  sellerRating: string
+  sellerLocation: string
+  sellerPhone: string
 }
 
 const EMPTY: FormState = {
@@ -52,12 +65,25 @@ const EMPTY: FormState = {
   category: 'SUV',
   status: 'available',
   description: '',
+  version: '',
+  doors: '4',
+  drivetrain: '',
+  power: '',
+  torque: '',
+  ipva: 'Pago',
+  featuresText: '',
+  galleryUrls: '',
   imageUrl: '',
   imageFile: null,
+  sellerName: DEFAULT_SELLER.name,
+  sellerRating: String(DEFAULT_SELLER.rating),
+  sellerLocation: DEFAULT_SELLER.location,
+  sellerPhone: DEFAULT_SELLER.phone,
 }
 
 function toFormState(initial?: Vehicle | null): FormState {
   if (!initial) return EMPTY
+  const extraImages = initial.images.filter((url) => url && url !== initial.imageUrl)
   return {
     brand: initial.brand,
     model: initial.model,
@@ -72,8 +98,20 @@ function toFormState(initial?: Vehicle | null): FormState {
     category: initial.category,
     status: initial.status,
     description: initial.description,
+    version: initial.version,
+    doors: String(initial.doors),
+    drivetrain: initial.drivetrain,
+    power: initial.power,
+    torque: initial.torque,
+    ipva: initial.ipva,
+    featuresText: initial.features.join('\n'),
+    galleryUrls: extraImages.join('\n'),
     imageUrl: initial.imageUrl,
     imageFile: null,
+    sellerName: initial.seller.name,
+    sellerRating: String(initial.seller.rating),
+    sellerLocation: initial.seller.location,
+    sellerPhone: initial.seller.phone,
   }
 }
 
@@ -92,6 +130,13 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 const ctrl =
   'w-full bg-neutral-50 rounded-md border border-neutral-200 text-body text-neutral-700 placeholder:text-neutral-400 px-4 min-h-[48px]'
+
+function parseLines(text: string): string[] {
+  return text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
 
 export default function VehicleForm({
   initial,
@@ -130,6 +175,9 @@ export default function VehicleForm({
         imageUrl = await uploadVehicleImage(getSupabaseClient(), form.imageFile)
       }
 
+      const extra = parseLines(form.galleryUrls)
+      const images = [imageUrl, ...extra.filter((url) => url !== imageUrl)]
+
       await onSubmit({
         brand: form.brand,
         model: form.model,
@@ -145,6 +193,20 @@ export default function VehicleForm({
         status: form.status,
         description: form.description,
         imageUrl,
+        version: form.version,
+        doors: Number(form.doors) || 4,
+        drivetrain: form.drivetrain,
+        power: form.power,
+        torque: form.torque,
+        ipva: form.ipva,
+        images,
+        features: parseLines(form.featuresText),
+        seller: {
+          name: form.sellerName || DEFAULT_SELLER.name,
+          rating: Number(form.sellerRating) || DEFAULT_SELLER.rating,
+          location: form.sellerLocation || DEFAULT_SELLER.location,
+          phone: form.sellerPhone || DEFAULT_SELLER.phone,
+        },
       })
     } finally {
       setSaving(false)
@@ -284,6 +346,58 @@ export default function VehicleForm({
             </select>
           </Field>
 
+          <Field label="Versão">
+            <input
+              value={form.version}
+              onChange={set('version')}
+              className={ctrl}
+              placeholder="Ex: XRE / Touring"
+            />
+          </Field>
+          <Field label="Portas">
+            <input
+              type="number"
+              value={form.doors}
+              onChange={set('doors')}
+              className={`${ctrl} tnum`}
+              min={2}
+              max={5}
+            />
+          </Field>
+          <Field label="Tração">
+            <input
+              value={form.drivetrain}
+              onChange={set('drivetrain')}
+              className={ctrl}
+              placeholder="Ex: Dianteira / Integral"
+            />
+          </Field>
+
+          <Field label="Potência">
+            <input
+              value={form.power}
+              onChange={set('power')}
+              className={ctrl}
+              placeholder="Ex: 177 cv"
+            />
+          </Field>
+          <Field label="Torque">
+            <input
+              value={form.torque}
+              onChange={set('torque')}
+              className={ctrl}
+              placeholder="Ex: 21,4 kgfm"
+            />
+          </Field>
+          <Field label="IPVA">
+            <input
+              value={form.ipva}
+              onChange={set('ipva')}
+              className={ctrl}
+              placeholder="Ex: Pago"
+            />
+          </Field>
+
           <div className="md:col-span-3">
             <Field label="Descrição">
               <textarea
@@ -297,8 +411,61 @@ export default function VehicleForm({
           </div>
 
           <div className="md:col-span-3">
+            <Field label="Equipamentos (um por linha)">
+              <textarea
+                value={form.featuresText}
+                onChange={set('featuresText')}
+                rows={5}
+                className={`${ctrl} py-3 resize-y`}
+                placeholder={'Ar-condicionado\nApple CarPlay\nCâmera de ré'}
+              />
+            </Field>
+          </div>
+
+          <div className="md:col-span-3 border-t border-neutral-200 pt-5">
+            <h3 className="text-h3 text-neutral-900 mb-4">Vendedor</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+              <Field label="Nome">
+                <input
+                  value={form.sellerName}
+                  onChange={set('sellerName')}
+                  className={ctrl}
+                  placeholder="Ex: Premium Motors SP"
+                />
+              </Field>
+              <Field label="Avaliação">
+                <input
+                  type="number"
+                  step="0.1"
+                  min={0}
+                  max={5}
+                  value={form.sellerRating}
+                  onChange={set('sellerRating')}
+                  className={`${ctrl} tnum`}
+                />
+              </Field>
+              <Field label="Localização">
+                <input
+                  value={form.sellerLocation}
+                  onChange={set('sellerLocation')}
+                  className={ctrl}
+                  placeholder="Ex: São Paulo, SP"
+                />
+              </Field>
+              <Field label="Telefone">
+                <input
+                  value={form.sellerPhone}
+                  onChange={set('sellerPhone')}
+                  className={`${ctrl} tnum`}
+                  placeholder="Ex: (11) 3456-7890"
+                />
+              </Field>
+            </div>
+          </div>
+
+          <div className="md:col-span-3">
             <span className="text-label text-neutral-700 font-semibold mb-2 block">
-              Upload de Fotos
+              Foto de capa
             </span>
             <input
               ref={fileRef}
@@ -331,6 +498,18 @@ export default function VehicleForm({
                 </div>
               )}
             </div>
+          </div>
+
+          <div className="md:col-span-3">
+            <Field label="URLs extras da galeria (uma por linha)">
+              <textarea
+                value={form.galleryUrls}
+                onChange={set('galleryUrls')}
+                rows={3}
+                className={`${ctrl} py-3 resize-y`}
+                placeholder="https://..."
+              />
+            </Field>
           </div>
         </div>
 

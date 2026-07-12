@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Heart, Gauge, Fuel, Settings2, MapPin } from 'lucide-react'
 import { brl, km } from '@/shared/lib/format'
 import { STATUS_META } from '@/features/vehicles/schema'
@@ -76,9 +77,15 @@ export default function VehicleCard({ v }: { v: Vehicle }) {
             <span className="text-overline text-neutral-400 uppercase block">Preço</span>
             <span className="text-h2 font-bold text-neutral-900 tnum">{brl(v.price)}</span>
           </div>
-          <button type="button" className="btn btn-primary !py-2 !px-3" disabled={sold}>
-            {sold ? 'Vendido' : 'Ver'}
-          </button>
+          {sold ? (
+            <button type="button" className="btn btn-primary !py-2 !px-3" disabled>
+              Vendido
+            </button>
+          ) : (
+            <Link to={`/veiculos/${v.id}`} className="btn btn-primary !py-2 !px-3">
+              Ver
+            </Link>
+          )}
         </div>
       </div>
     </article>

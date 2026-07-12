@@ -5,6 +5,7 @@ import { VehiclesProvider } from '@/features/vehicles/context/VehiclesContext'
 import { ClientsProvider } from '@/features/clients/context/ClientsContext'
 import { MarketplaceFiltersProvider } from '@/features/vehicles/context/MarketplaceFiltersContext'
 import Home from '@/features/vehicles/pages/Home'
+import VehicleDetail from '@/features/vehicles/pages/VehicleDetail'
 import Login from '@/features/auth/pages/Login'
 import AdminLayout from '@/features/admin/pages/AdminLayout'
 import AdminVehicles from '@/features/admin/pages/AdminVehicles'
@@ -16,29 +17,25 @@ export default function App() {
       <AuthProvider>
         <VehiclesProvider>
           <ClientsProvider>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <MarketplaceFiltersProvider>
-                    <Home />
-                  </MarketplaceFiltersProvider>
-                }
-              />
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <AdminLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<AdminVehicles />} />
-                <Route path="clientes" element={<AdminClients />} />
-              </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <MarketplaceFiltersProvider>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/veiculos/:id" element={<VehicleDetail />} />
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AdminVehicles />} />
+                  <Route path="clientes" element={<AdminClients />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </MarketplaceFiltersProvider>
           </ClientsProvider>
         </VehiclesProvider>
       </AuthProvider>

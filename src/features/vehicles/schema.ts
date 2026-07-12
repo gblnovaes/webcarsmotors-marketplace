@@ -52,3 +52,10 @@ export const STATUS_META: Record<
 
 export const DEFAULT_VEHICLE_IMAGE =
   'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&q=80&auto=format&fit=crop'
+
+export const DEFAULT_SELLER = {
+  name: 'WebCars Motors',
+  rating: 4.8,
+  location: 'São Paulo, SP',
+  phone: '(11) 4000-0000',
+} as const

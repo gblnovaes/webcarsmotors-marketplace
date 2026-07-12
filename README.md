@@ -75,7 +75,79 @@ Arquivos em `supabase/migrations/` (já aplicadas no projeto remoto):
 1. `init_vehicles` — tabelas, RLS, Storage `vehicle-images`
 2. `seed_vehicles` — 6 veículos de exemplo
 3. `init_clients` — tabela `clients` + RLS (admin-only)
-4. `seed_clients` — 6 clientes de exemplo
+4. `seed_clients` / `seed_clients_10` — 10 clientes de exemplo
+
+## Seed de clientes (local vs Supabase)
+
+São **dois caminhos distintos**. O seed local **não** passa por migration SQL.
+
+### Modo local (`VITE_DATA_SOURCE=local`)
+
+Os dados vêm de `src/data/seed/clients.ts` e entram no `localStorage` na primeira carga (chave `carriage:clients`).
+
+```bash
+# .env
+VITE_DATA_SOURCE=local
+```
+
+```bash
+npm run dev
+# abrir /admin/clientes
+```
+
+**Para forçar o seed de novo** (ex.: depois de atualizar de 6 → 10 clientes):
+
+- DevTools → Application → Local Storage → apagar `carriage:clients`
+- Ou no console: `localStorage.removeItem('carriage:clients')` e recarregar
+
+Sem limpar a chave, o app continua com a lista antiga já salva.
+
+### Modo Supabase (`VITE_DATA_SOURCE=supabase`)
+
+Migrations SQL em `supabase/migrations/`:
+
+| Arquivo | Função |
+|---------|--------|
+| `20260712140000_init_clients.sql` | Cria tabela `clients` + RLS |
+| `20260712140100_seed_clients.sql` | Seed inicial |
+| `20260712140200_seed_clients_10.sql` | Upsert dos 10 clientes |
+
+**CLI (recomendado):**
+
+```bash
+npx supabase login
+npx supabase link --project-ref shegwaapatxluqeeztzk
+npx supabase db push
+```
+
+`db push` aplica só o que ainda não está no histórico remoto.
+
+**Re-seed manual:** cole o conteúdo de `20260712140200_seed_clients_10.sql` no [SQL Editor](https://supabase.com/dashboard/project/shegwaapatxluqeeztzk/sql) e rode. O `ON CONFLICT DO UPDATE` atualiza os 10 registros mesmo se já existirem.
+
+**Stack local (Docker):**
+
+```bash
+npx supabase start
+npx supabase db reset   # recria DB e roda todas as migrations + seeds
+```
+
+Aponte o `.env` para a URL/anon key impressas pelo `supabase start`.
+
+**App apontando para o remoto:**
+
+```bash
+VITE_DATA_SOURCE=supabase
+VITE_SUPABASE_URL=https://shegwaapatxluqeeztzk.supabase.co
+VITE_SUPABASE_ANON_KEY=<sua anon key>
+```
+
+Login admin → `/admin/clientes`.
+
+| Objetivo | O que fazer |
+|----------|-------------|
+| Ver 10 clientes no modo local | Limpar `carriage:clients` + reload |
+| Criar tabela / seed no remoto | `npx supabase db push` (ou SQL Editor) |
+| Reaplicar só o seed remoto | Rodar `seed_clients_10.sql` no SQL Editor |
 
 ## Design system
 

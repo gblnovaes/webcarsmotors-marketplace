@@ -1,4 +1,4 @@
--- Seed de 10 clientes de exemplo (ids estáveis para demos)
+-- Atualiza seed para 10 clientes com dados preenchidos
 
 insert into public.clients (
   id, full_name, cpf, birth_date, email, phone, profession,
