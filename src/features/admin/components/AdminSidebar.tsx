@@ -1,13 +1,13 @@
 import { LayoutGrid, Car, Users, Wallet, Settings, LogOut } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 
 const NAV = [
   { icon: LayoutGrid, label: 'Dashboard' },
-  { icon: Car, label: 'Veículos', active: true },
-  { icon: Users, label: 'Clientes' },
+  { icon: Car, label: 'Veículos', to: '/admin' },
+  { icon: Users, label: 'Clientes', to: '/admin/clientes' },
   { icon: Wallet, label: 'Financeiro' },
   { icon: Settings, label: 'Configurações' },
-]
+] as const
 
 type AdminSidebarProps = {
   userLabel: string
@@ -30,24 +30,44 @@ export function AdminSidebar({ userLabel, onSignOut, onNavigate }: AdminSidebarP
       </Link>
 
       <nav className="px-4 py-2 space-y-1 flex-1">
-        {NAV.map(({ icon: Icon, label, active }) => (
-          <a
-            key={label}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              onNavigate?.()
-            }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-md text-label transition-colors ${
-              active
-                ? 'bg-primary text-neutral-0'
-                : 'text-neutral-400 hover:text-neutral-0 hover:bg-neutral-800'
-            }`}
-          >
-            <Icon size={18} strokeWidth={1.75} />
-            {label}
-          </a>
-        ))}
+        {NAV.map((item) => {
+          const Icon = item.icon
+          if ('to' in item && item.to) {
+            return (
+              <NavLink
+                key={item.label}
+                to={item.to}
+                end={item.to === '/admin'}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-4 py-3 rounded-md text-label transition-colors ${
+                    isActive
+                      ? 'bg-primary text-neutral-0'
+                      : 'text-neutral-400 hover:text-neutral-0 hover:bg-neutral-800'
+                  }`
+                }
+              >
+                <Icon size={18} strokeWidth={1.75} />
+                {item.label}
+              </NavLink>
+            )
+          }
+
+          return (
+            <a
+              key={item.label}
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                onNavigate?.()
+              }}
+              className="flex items-center gap-3 px-4 py-3 rounded-md text-label transition-colors text-neutral-400 hover:text-neutral-0 hover:bg-neutral-800"
+            >
+              <Icon size={18} strokeWidth={1.75} />
+              {item.label}
+            </a>
+          )
+        })}
       </nav>
 
       <div className="border-t border-neutral-800 p-4">
