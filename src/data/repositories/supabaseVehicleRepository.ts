@@ -1,5 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Vehicle, VehicleInput, VehiclePatch, VehicleStatus } from '@/features/vehicles/types'
+import type {
+  Vehicle,
+  VehicleInput,
+  VehiclePatch,
+  VehicleSeller,
+  VehicleStatus,
+} from '@/features/vehicles/types'
+import { DEFAULT_SELLER } from '@/features/vehicles/schema'
 import type { VehicleRepository } from './types'
 
 type VehicleRow = {
@@ -18,11 +25,36 @@ type VehicleRow = {
   status: VehicleStatus
   description: string
   image_url: string
+  version: string | null
+  doors: number | null
+  drivetrain: string | null
+  power: string | null
+  torque: string | null
+  ipva: string | null
+  images: string[] | null
+  features: string[] | null
+  seller_name: string | null
+  seller_rating: number | null
+  seller_location: string | null
+  seller_phone: string | null
   created_at: string | null
   updated_at: string | null
 }
 
+function rowToSeller(row: VehicleRow): VehicleSeller {
+  return {
+    name: row.seller_name || DEFAULT_SELLER.name,
+    rating: Number(row.seller_rating) || DEFAULT_SELLER.rating,
+    location: row.seller_location || DEFAULT_SELLER.location,
+    phone: row.seller_phone || DEFAULT_SELLER.phone,
+  }
+}
+
 function rowToVehicle(row: VehicleRow): Vehicle {
+  const imageUrl = row.image_url || ''
+  const images =
+    row.images && row.images.length > 0 ? row.images : imageUrl ? [imageUrl] : []
+
   return {
     id: row.id,
     brand: row.brand,
@@ -38,7 +70,16 @@ function rowToVehicle(row: VehicleRow): Vehicle {
     category: row.category,
     status: row.status,
     description: row.description,
-    imageUrl: row.image_url,
+    imageUrl: imageUrl || images[0] || '',
+    version: row.version ?? '',
+    doors: row.doors ?? 4,
+    drivetrain: row.drivetrain ?? '',
+    power: row.power ?? '',
+    torque: row.torque ?? '',
+    ipva: row.ipva ?? '',
+    images,
+    features: row.features ?? [],
+    seller: rowToSeller(row),
     createdAt: row.created_at ?? undefined,
     updatedAt: row.updated_at ?? undefined,
   }
@@ -59,7 +100,32 @@ function inputToRow(input: VehicleInput | VehiclePatch) {
   if (input.category !== undefined) row.category = input.category
   if (input.status !== undefined) row.status = input.status
   if (input.description !== undefined) row.description = input.description
-  if (input.imageUrl !== undefined) row.image_url = input.imageUrl
+  if (input.version !== undefined) row.version = input.version
+  if (input.doors !== undefined) row.doors = input.doors
+  if (input.drivetrain !== undefined) row.drivetrain = input.drivetrain
+  if (input.power !== undefined) row.power = input.power
+  if (input.torque !== undefined) row.torque = input.torque
+  if (input.ipva !== undefined) row.ipva = input.ipva
+  if (input.features !== undefined) row.features = input.features
+
+  if (input.images !== undefined || input.imageUrl !== undefined) {
+    const images =
+      input.images && input.images.length > 0
+        ? input.images
+        : input.imageUrl
+          ? [input.imageUrl]
+          : []
+    row.images = images
+    row.image_url = images[0] ?? input.imageUrl ?? ''
+  }
+
+  if (input.seller !== undefined) {
+    row.seller_name = input.seller.name
+    row.seller_rating = input.seller.rating
+    row.seller_location = input.seller.location
+    row.seller_phone = input.seller.phone
+  }
+
   return row
 }
 

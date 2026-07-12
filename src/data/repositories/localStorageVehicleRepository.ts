@@ -1,14 +1,33 @@
-import type { Vehicle, VehicleInput, VehiclePatch } from '@/features/vehicles/types'
+import type { Vehicle, VehicleInput, VehiclePatch, VehicleSeller } from '@/features/vehicles/types'
+import { DEFAULT_SELLER } from '@/features/vehicles/schema'
 import { seedVehicles } from '@/data/seed/vehicles'
 import type { VehicleRepository } from './types'
 
-const STORAGE_KEY = 'carriage:vehicles'
+const STORAGE_KEY = 'carriage:vehicles:v2'
 
 function createId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID()
   }
   return `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+function asStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is string => typeof item === 'string')
+}
+
+function normalizeSeller(raw: unknown): VehicleSeller {
+  if (!raw || typeof raw !== 'object') {
+    return { ...DEFAULT_SELLER }
+  }
+  const s = raw as Record<string, unknown>
+  return {
+    name: typeof s.name === 'string' && s.name ? s.name : DEFAULT_SELLER.name,
+    rating: Number(s.rating) || DEFAULT_SELLER.rating,
+    location: typeof s.location === 'string' && s.location ? s.location : DEFAULT_SELLER.location,
+    phone: typeof s.phone === 'string' && s.phone ? s.phone : DEFAULT_SELLER.phone,
+  }
 }
 
 function normalizeVehicle(raw: Record<string, unknown>): Vehicle {
@@ -18,6 +37,9 @@ function normalizeVehicle(raw: Record<string, unknown>): Vehicle {
       : typeof raw.image === 'string'
         ? raw.image
         : ''
+
+  const images = asStringArray(raw.images)
+  const gallery = images.length > 0 ? images : imageUrl ? [imageUrl] : []
 
   return {
     id: String(raw.id),
@@ -34,7 +56,16 @@ function normalizeVehicle(raw: Record<string, unknown>): Vehicle {
     category: String(raw.category ?? ''),
     status: (raw.status as Vehicle['status']) || 'available',
     description: String(raw.description ?? ''),
-    imageUrl,
+    imageUrl: imageUrl || gallery[0] || '',
+    version: String(raw.version ?? ''),
+    doors: Number(raw.doors) || 4,
+    drivetrain: String(raw.drivetrain ?? ''),
+    power: String(raw.power ?? ''),
+    torque: String(raw.torque ?? ''),
+    ipva: String(raw.ipva ?? ''),
+    images: gallery,
+    features: asStringArray(raw.features),
+    seller: normalizeSeller(raw.seller),
     createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : undefined,
     updatedAt: typeof raw.updatedAt === 'string' ? raw.updatedAt : undefined,
   }
@@ -56,6 +87,16 @@ function save(vehicles: Vehicle[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles))
 }
 
+function withSyncedCover(input: VehicleInput): VehicleInput {
+  const images =
+    input.images.length > 0 ? input.images : input.imageUrl ? [input.imageUrl] : []
+  return {
+    ...input,
+    images,
+    imageUrl: images[0] ?? input.imageUrl,
+  }
+}
+
 export function createLocalStorageVehicleRepository(): VehicleRepository {
   return {
     async list() {
@@ -68,8 +109,9 @@ export function createLocalStorageVehicleRepository(): VehicleRepository {
 
     async create(input: VehicleInput) {
       const now = new Date().toISOString()
+      const synced = withSyncedCover(input)
       const vehicle: Vehicle = {
-        ...input,
+        ...synced,
         id: createId(),
         createdAt: now,
         updatedAt: now,
@@ -84,10 +126,37 @@ export function createLocalStorageVehicleRepository(): VehicleRepository {
       const list = load()
       const index = list.findIndex((v) => v.id === id)
       if (index === -1) throw new Error(`Vehicle ${id} not found`)
+      const current = list[index]
+      const merged: Vehicle = { ...current, ...patch, id }
+      const synced = withSyncedCover({
+        brand: merged.brand,
+        model: merged.model,
+        year: merged.year,
+        price: merged.price,
+        km: merged.km,
+        fuel: merged.fuel,
+        transmission: merged.transmission,
+        color: merged.color,
+        plate: merged.plate,
+        location: merged.location,
+        category: merged.category,
+        status: merged.status,
+        description: merged.description,
+        imageUrl: merged.imageUrl,
+        version: merged.version,
+        doors: merged.doors,
+        drivetrain: merged.drivetrain,
+        power: merged.power,
+        torque: merged.torque,
+        ipva: merged.ipva,
+        images: merged.images,
+        features: merged.features,
+        seller: merged.seller,
+      })
       const updated: Vehicle = {
-        ...list[index],
-        ...patch,
+        ...synced,
         id,
+        createdAt: current.createdAt,
         updatedAt: new Date().toISOString(),
       }
       list[index] = updated
